@@ -7,7 +7,7 @@ import { ServiceContext } from '../context/ServiceContext'
 
 const Login = () => {
 
-    const [state, setState] = useState('Admin')
+    const [state, setState] = useState('Service')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 

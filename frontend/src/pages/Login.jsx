@@ -73,6 +73,14 @@ const Login = () => {
           ? <p className='text-blue-500 cursor-pointer' >Already have an account? <span onClick={()=>setState('login')} className=''>Login</span> </p>
           : <p className='text-blue-500 cursor-pointer' >Don't have an account? <span onClick={()=>setState('sign up')} className=''>Sign Up</span></p>
         }
+        {/* Are you an expert section */}
+        <div className='mt-4'>
+          <p className='text-red-600 font-semibold'>
+            Are you an expert? <span 
+            onClick={() => window.location.href = 'https://clone-calender-admins.vercel.app'}
+            className='text-red-800 underline cursor-pointer'>Go to</span>
+          </p>
+        </div>
       </div>
       
     </form>

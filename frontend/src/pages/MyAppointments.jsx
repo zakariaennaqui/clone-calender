@@ -120,6 +120,40 @@ const MyAppointments = () => {
   }
 }
 
+const appointmentPayzone = async (appointmentId) => {
+  try {
+    const { data } = await axios.post(backendUrl + '/api/user/payment-payzone', {
+      appointmentId
+    }, {
+      headers: { token }
+    });
+
+    if (data.success) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.formData.url;
+
+      Object.entries(data.formData.data).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      toast.error(data.message);
+    }
+
+  } catch (error) {
+    console.log(error);
+    toast.error(error.message);
+  }
+};
+
+
   useEffect(()=>{
     if (token) {
       getUserAppointments()
@@ -153,6 +187,7 @@ const MyAppointments = () => {
                     <>
                     <button onClick={() => appointmentRazorpay(item._id)} className='text-blue-500'>Pay with Razorpay</button>
                     <button onClick={() => appointmentStripe(item._id)} className='text-purple-500'>Pay with Stripe</button>
+                    <button onClick={() => appointmentPayzone(item._id)} className='text-green-500'>Pay with Payzone</button>
                     </>
                   )}
                   {!item.cancelled && !item.isCompleted && <button onClick={()=>cancelAppointment(item._id)} className='text-red-500'>cancel appointment</button>}

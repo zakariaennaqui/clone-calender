@@ -319,4 +319,56 @@ const verifyStripe = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay, verifyRazorpay, paymentStripe, verifyStripe };
+const paymentPayzone = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    const appointment = await appointmentModel.findById(appointmentId);
+
+    if (!appointment || appointment.cancelled) {
+      return res.json({ success: false, message: "Appointment not found or cancelled" });
+    }
+
+    const merchantId = process.env.PAYZONE_MERCHANT_ID;
+    const secretKey = process.env.PAYZONE_SECRET;
+    const amount = appointment.amount;
+
+    const returnUrl = `${req.headers.origin}/verify-payment?provider=payzone&success=true&appointmentId=${appointmentId}`;
+
+    // Signature simulée (à adapter selon documentation Payzone)
+    const crypto = await import('crypto');
+    const signature = crypto.createHash('sha256').update(
+      merchantId + appointmentId + amount + secretKey
+    ).digest('hex');
+
+    res.json({
+      success: true,
+      formData: {
+        url: 'https://payzone.ma', // à remplacer par URL réelle Payzone https://sandbox.payzone.ma/payment
+        data: {
+          merchant_id: merchantId,
+          appointment_id: appointmentId,
+          amount,
+          return_url: returnUrl,
+          signature
+        }
+      }
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+const verifyPayzone = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    await appointmentModel.findByIdAndUpdate(appointmentId, { payment: true });
+    res.json({ success: true, message: "Payzone payment verified successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, paymentRazorpay, verifyRazorpay, paymentStripe, verifyStripe, paymentPayzone, verifyPayzone };
